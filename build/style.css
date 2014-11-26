@@ -907,6 +907,20 @@ h5, .h5 {
   font-family: 'Raleway', sans-serif;
   padding-top: 2em; }
 
+textarea {
+  width: 100%;
+  border: 1px solid #dedede;
+  border-radius: 3px;
+  margin-bottom: 1em;
+  min-height: 200px;
+  display: block; }
+
+p.error {
+  min-width: 100%;
+  color: red;
+  text-align: center;
+  text-transform: capitalize; }
+
 .meta {
   width: 100%;
   display: -webkit-flex;

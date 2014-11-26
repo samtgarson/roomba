@@ -1,105 +1,50 @@
 angular.module('home', [])
     .controller('homeController', function($scope, $timeout) {
+        $scope.input = '';
+        $scope.error = '';
+        var letters = ['N', 'S', 'E', 'W'];
 
-        // Translation hash from compass direction to coordinate vectors
-        var dir = {
-            'N': {'x':0, 'y':1},
-            'S': {'x':0, 'y':-1},
-            'E': {'x':1, 'y':0},
-            'W': {'x':-1, 'y':0}
-        };
+        $scope.process = function() {
+            try {    
+                var lines = $scope.input.split('\n');
 
-        // Initiate starting variables
-        $scope.grid = [];
-        $scope.patches = [];
-        $scope.instructions = ['E', 'N', 'E', 'E', 'E', 'E', 'E', 'E', 'N', 'W'];
-        $scope.totalCleaned = 0;
-        $scope.interval = 500;
-        $scope.busy = false;
-        var skip = false;
 
-        $scope.currentPos = {'x': 0, 'y': 0};
-
-        // Function to create 2D Array
-        function createGrid (x, y) {
-            for (var i=0,row=[];i<x;i++) row.push(0); // Create one row of 0s
-            for (var j=0,grid=[];j<y;j++ ) {
-                grid.push({
-                    'value' : (JSON.parse(JSON.stringify(row))), // Clone row
-                    'index':j // index for ng-repeat reverse ordering
-                });
-            }
-            return grid;
-        }
-
-        // Function to insert patches into grid
-        function createPatches (grid, patches) {
-            for (var i=0;i<patches.length;i++) { // for each patch
-                grid[patches[i].y].value[patches[i].x] = 2; // set the correct cell
-            }
-            return grid;
-        }
-
-        // Function to start simulation
-        $scope.start = function start (s) {
-            skip = s;
-            $scope.busy = true;
-            process(0);
-        };
-
-        // Process next step
-        function process(step) {
-            if (step != $scope.instructions.length) { // If there are more steps
-                var nextStep = dir[$scope.instructions[step]]; // Translate next vector into coordinate deltas
-                
-                // Calculate new position based on next instruction
-                var newPos = {
-                    'x' : $scope.currentPos.x + nextStep.x,
-                    'y' : $scope.currentPos.y + nextStep.y
-                };
-
-                // Check Roomba isn't against a wall
-                if (newPos.x < $scope.grid[0].value.length && newPos.y < $scope.grid.length) { 
-                    $scope.currentPos = newPos;
-
-                    if ($scope.grid[$scope.currentPos.y].value[$scope.currentPos.x]) { // if the current cell is dirty (==1)
-                        $scope.totalCleaned ++; // increase counter
+                if (lines.length > 3) {
+                    // Get roomba instructions
+                    var instructions = lines.splice(lines.length-1, 1)[0].split('');
+                    if (instructions.length < 1) throw 'invalid instructions'; // If there's no instructions
+                    // If any of the instructions aren't compass directions
+                    for (var i=0; i<instructions.length; i++) {
+                        if (letters.indexOf(instructions[i]) < 0) throw 'invalid instructions';
                     }
-                    $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1; // clean it
+                    // Get grid size
+                    var size = lines.splice(0,1)[0].split(' ');
+                    if (size.length!=2 || isNaN(size[0]) || isNaN(size[1])) throw 'invalid grid size'; // If there aren't 2 lengths or they're not numbers
+                    size[0] = parseInt(size[0]);
+                    size[1] = parseInt(size[1]);
 
-                    if (!skip) updateUI(); // Update UI
-                    $timeout(function() { // Wait for UI animation
-                        process(step+1); // Then process next instruction
-                    }, skip?0:$scope.interval);
-                } else process(step+1);
-            } else finish();
-        }
+                    // Get initial roomba position
+                    var pos = lines.splice(0,1)[0].split(' ');
+                    if (pos.length!=2 || isNaN(pos[0]) || isNaN(pos[1]) || pos[0]>=size[0] || pos[1]>=size[1]) throw 'invalid initial position'; // If there aren't 2 coords or they're not numbers or they're outside the grid
+                    pos = {'x': parseInt(pos[0]), 'y': parseInt(pos[1])};
 
-        // Finsih and display
-        function finish () {
-            $scope.busy = false;
-            alert('Final Position: (' + $scope.currentPos.x + ', ' + $scope.currentPos.y + ')\nTotal Patches Cleaned: ' +  $scope.totalCleaned);
-            updateUI(); // Update UI
-        }
-
-        // Function to Update Roomba's position in the UI
-        function updateUI() {
-            var css = {
-                width: 100 / $scope.grid[0].value.length + '%', 
-                height: 100/$scope.grid.length + '%', 
-                transform: 'translateX(' + $scope.currentPos.x*100 + '%) translateY(-' + $scope.currentPos.y*100 + '%)'
-            };
-            $('.roomba').css(css);
-        }
-
-
-        // TEST SETUP
-        var emptyGrid = createGrid(5, 5),
-        patches = [
-            {'x': 1, 'y': 3},
-            {'x': 3, 'y': 1},
-            {'x': 4, 'y': 4}
-        ];
-        $scope.grid = createPatches(emptyGrid, patches);
-        updateUI();
+                    // Get patch positions
+                    var patches = lines.reduce(function(prev, current) {
+                        var c = current.split(' ');
+                        if (c.length != 2 || isNaN(c[0]) || isNaN(c[1])) throw "invalid patch coords"; // If there aren't 2 lengths or they're not numbers
+                        prev.push({
+                            'x': parseInt(c[0]),
+                            'y': parseInt(c[1])
+                        });
+                        return prev;
+                    }, []);
+                    console.log(instructions);
+                    console.log(size);
+                    console.log(pos);
+                    console.log(patches);
+                } else throw 'invalid input';
+            } catch (err) {
+                $scope.error = err;
+            }
+        };
     });

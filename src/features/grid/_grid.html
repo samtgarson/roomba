@@ -1,0 +1,14 @@
+<div class="grid">
+    <div class="row" ng-repeat="row in grid | orderBy : index : reverse " ng-init="y = $index">
+        <span class="cell" ng-repeat="cell in row.value track by $index" ng-init="x = $index">
+            <div class="patch" ng-if="cell>1"></div>
+            <div class="visited" ng-if="cell==1"></div>
+        </span>
+    </div>
+    <div class="roomba"><span></span></div>
+</div>    
+<div class=meta>
+    <a class="button" ng-class="{'busy': busy}" ng-click="!busy && start(0)" ng-bind="busy?'Busy...':'Simulate'"></a>
+    <a class="button" ng-class="{'busy': busy}" ng-click="!busy && start(1)" ng-bind="busy?'Busy...':'Get On With It'"></a>
+</div>
+<a class="button button--minor" ng-class="{'busy': busy}" ng-click="!busy && another()" ng-bind="busy?'Busy...':'Another'"></a>
