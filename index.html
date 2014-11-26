@@ -6,15 +6,15 @@
 
         <base href="/" >
 
-        <title ng-bind=""></title>
-        <meta name="description" content="">
-        <meta name="author" content="">
+        <title ng-bind="'Roomba'">Roomba</title>
+        <meta name="description" content="Automated Hoover Simulator">
+        <meta name="author" content="Sam Garson">
         <meta name="viewport" content="initial-scale=1, maximum-scale=1, width=device-width">
 
         <link rel="stylesheet" href="/build/normalize.css" />
         <link rel="stylesheet" href="/build/style.css" />
         
-        <!-- <link href='http://fonts.googleapis.com/css?family=Roboto:400,100,300,500' rel='stylesheet' type='text/css'> -->
+        <link href='http://fonts.googleapis.com/css?family=Raleway:400,600' rel='stylesheet' type='text/css'>
         <!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script> -->
 
         <script type="application/javascript" src="/build/script.js"></script>
@@ -24,7 +24,8 @@
         <![endif]-->
     </head>
 
-    <body breakpoint="{0:'small', 750:'mid', 1100:''}">
+    <body breakpoint="{0:'small', 500:'mid', 1100:''}">
         <!-- {{appCtrl.hello}} -->
+        <ui-view class="wrapper"></ui-view>
     </body>
 </html>

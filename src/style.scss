@@ -1,30 +1,187 @@
 // Import UI library
 @import "brand/*";
-@import "layout/**";
-@import "patterns/**";
+// @import "layout/**";
+// @import "patterns/**";
 
 
 
-input,
-textarea,
-button,
-select,
-a {
-  -webkit-tap-highlight-color: rgba(0,0,0,0);
+// input,
+// textarea,
+// button,
+// select,
+// a {
+//   -webkit-tap-highlight-color: rgba(0,0,0,0);
+// }
+
+// .clickable {
+//     cursor: pointer;
+// }
+
+// .right {
+//     float: right;
+// }
+
+// .center {
+//     text-align: center;
+// }
+
+// .spacer {
+//     margin: 3.5em auto;
+// }
+
+.wrapper {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    font-family: 'Raleway', sans-serif;
+    padding-top: 2em;
 }
 
-.clickable {
-    cursor: pointer;
+.meta {
+    width: 100%;
+    display: flex;
+    flex-flow: row wrap;
 }
-
-.right {
-    float: right;
-}
-
-.center {
+.button {
+    flex: 1 1 auto;
     text-align: center;
+    padding: .8em;
+    margin: 0 5px 1em;
+    border-radius: 3px;
+    color: white;
+    background-color: #1abc9c;
+    text-transform: uppercase;
+    font-weight: 500;
+    cursor: pointer;
+
+    transition: transform .1s, background-color .2s, opacity .2s;
+
+    &.busy {
+        opacity: .7;
+        cursor: not-allowed;
+        transform: translateY(0) !important;
+        opacity: .7 !important;
+        background-color: #1abc9c !important;
+    }
+
+    &:hover {
+        transform: translateY(-1px);
+        opacity: .9;
+    }
+
+    &:active {
+        transform: translateY(1px);
+        background-color: #16a085;
+    }
+}
+.small .button {
+    min-width: 100%;
 }
 
-.spacer {
-    margin: 3.5em auto;
+.button--minor {
+    background-color: #dedede;
+    display: block;
+
+    &.busy {
+        background-color: #dedede !important;
+    }
+
+    &:active {
+        background-color: #bcbcbc;
+    }
+}
+
+.grid {
+    width: 100%;
+    // margin: 0 auto;
+    max-height: 500px;
+    height: 100vh;
+    display: flex;
+    flex-flow: column nowrap;
+    position: relative;
+    margin-bottom: 2em;
+}
+
+$dot-size: 20%;
+
+.roomba {
+    position: absolute;
+    background-color: transparent;
+    // border: 5px solid black;
+    // border-radius: 8px;
+    // z-index: 100;
+    box-sizing: border-box;
+    bottom: 0;
+    left: 0;
+    transition-property: transform;
+    transition-duration:  .4s;
+    // transition-timing-function: cubic-bezier(0.175, 0.885, 0.320, 1.275);
+
+    span {
+        width: $dot-size;
+        height: $dot-size;
+        left: calc(#{100-$dot-size} / 2);
+        top: calc(#{100-$dot-size} / 2);
+        position: absolute;
+        border-radius: 100px;
+        background-color: #1abc9c;
+        box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.row {
+    flex: 1 1 auto;
+    display: flex;
+    flex-flow: row nowrap;
+
+}
+
+.cell {
+    flex: 1 1 auto;
+    min-height: 100%;
+    border-radius: 3px;
+    margin: 10px;
+    background-color: #eee;
+    position: relative;
+}
+
+.visited {
+    width: $dot-size;
+    height: $dot-size;
+    left: calc(#{100-$dot-size} / 2);
+    top: calc(#{100-$dot-size} / 2);
+    position: absolute;
+    border-radius: 100px;
+    background-color: rgba(0, 0, 0, .1);
+    transform: scale(.8);
+
+    @include reveal-to(transform .2s .5s cubic-bezier(0.600, -0.280, 0.735, 0.045)) {
+        transform: scale(1);
+    };
+
+    @include reveal-from(transform .2s .5s cubic-bezier(0.600, -0.280, 0.735, 0.045)) {
+        transform: scale(0);
+    };
+}
+
+.patch {
+    background-color: #d35400;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    position: absolute;
+    border-radius: 3px;
+
+    @include reveal-to() {
+        transform: scale(1);
+    };
+
+    @include reveal-from(transform .2s .2s cubic-bezier(0.600, -0.280, 0.735, 0.045)) {
+        transform: scale(0);
+    };
 }

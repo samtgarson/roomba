@@ -2,10 +2,10 @@ angular.module('states', [])
 
     // When app is first run;
     // Checks if user is logged in with Cookies
-    .run (function($rootScope, Gojimo, $state, $cookieStore, prevState, auth, Facebook, $location) {
+    .run (function() {
 
     })
-    .config(function($stateProvider, $stickyStateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
+    .config(function($stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
         $httpProvider.interceptors.push(function($q, $rootScope, $location) {
             return {
@@ -34,7 +34,7 @@ angular.module('states', [])
         // Function to generate template urls
         function templater (page, child) {
             if (angular.isUndefined(child)) child = page;
-            return 'features/' + page + '/' + child + '.html';
+            return 'features/' + page + '/_' + child + '.html';
         }
 
         $stateProvider

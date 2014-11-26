@@ -4,13 +4,12 @@ angular.module('app', [
     // App
     'ui.router',
     'templates',
-    'utils',
     'breakpointApp',
-    'ct.ui.router.extras',
+    // 'ct.ui.router.extras',
     'ngAnimate',
-    'ngSanitize',
+    // 'ngSanitize',
     'states',
-    'facebook',
+    // 'facebook',
     'services',
 
     // Features
