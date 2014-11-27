@@ -5,27 +5,24 @@ angular.module('app', [
     'ui.router',
     'templates',
     'breakpointApp',
-    // 'ct.ui.router.extras',
     'ngAnimate',
-    // 'ngSanitize',
+    'ngSanitize',
     'states',
     // 'facebook',
     'services',
 
     // Features
-    'home'
+    'home',
+    'grid'
     
     // Patterns
 ])
 
-    .config(function() {
+    // .config(function() {
 
-    })
+    // })
 
     .controller('appController', function ($scope) {
-        var $this = this;
-        this.hello = 'hello world';
-        
-        
+        var $this = this;    
     });
 

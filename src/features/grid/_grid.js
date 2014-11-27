@@ -1,5 +1,5 @@
 angular.module('grid', [])
-    .controller('gridController', function($scope, $timeout) {
+    .controller('gridController', function($scope, $timeout, Instructions, $state) {
           
         // Translation hash from compass direction to coordinate vectors
         var dir = {
@@ -12,7 +12,7 @@ angular.module('grid', [])
         // Initiate starting variables
         $scope.grid = [];
         $scope.patches = [];
-        $scope.instructions = ['E', 'N', 'E', 'E', 'E', 'E', 'E', 'E', 'N', 'W'];
+        $scope.directions = [];
         $scope.totalCleaned = 0;
         $scope.interval = 500;
         $scope.busy = false;
@@ -26,7 +26,7 @@ angular.module('grid', [])
             for (var j=0,grid=[];j<y;j++ ) {
                 grid.push({
                     'value' : (JSON.parse(JSON.stringify(row))), // Clone row
-                    'index':j // index for ng-repeat reverse ordering
+                    'index':parseInt(j) // index for ng-repeat reverse ordering
                 });
             }
             return grid;
@@ -41,16 +41,22 @@ angular.module('grid', [])
         }
 
         // Function to start simulation
-        $scope.start = function start (s) {
+        $scope.start = function (s) {
             skip = s;
             $scope.busy = true;
             process(0);
         };
 
+        // Reset the grid and return home
+        $scope.reset = function () {
+            Instructions.reset();
+            $state.go('home');
+        };
+
         // Process next step
         function process(step) {
-            if (step != $scope.instructions.length) { // If there are more steps
-                var nextStep = dir[$scope.instructions[step]]; // Translate next vector into coordinate deltas
+            if (step != $scope.directions.length) { // If there are more steps
+                var nextStep = dir[$scope.directions[step]]; // Translate next vector into coordinate deltas
                 
                 // Calculate new position based on next instruction
                 var newPos = {
@@ -59,10 +65,10 @@ angular.module('grid', [])
                 };
 
                 // Check Roomba isn't against a wall
-                if (newPos.x < $scope.grid[0].value.length && newPos.y < $scope.grid.length) { 
+                if (newPos.x < $scope.grid[0].value.length && newPos.y < $scope.grid.length && newPos.x >= 0 && newPos.y >= 0) { 
                     $scope.currentPos = newPos;
 
-                    if ($scope.grid[$scope.currentPos.y].value[$scope.currentPos.x]) { // if the current cell is dirty (==1)
+                    if ($scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] > 1) { // if the current cell is dirty (==1)
                         $scope.totalCleaned ++; // increase counter
                     }
                     $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1; // clean it
@@ -71,35 +77,49 @@ angular.module('grid', [])
                     $timeout(function() { // Wait for UI animation
                         process(step+1); // Then process next instruction
                     }, skip?0:$scope.interval);
-                } else process(step+1);
+                } else process(step+1); // The roomba skids against the wall, process the next step
             } else finish();
         }
 
         // Finsih and display
         function finish () {
             $scope.busy = false;
+            console.log($scope.currentPos.x, $scope.currentPos.y);
             alert('Final Position: (' + $scope.currentPos.x + ', ' + $scope.currentPos.y + ')\nTotal Patches Cleaned: ' +  $scope.totalCleaned);
+            console.log($scope.totalCleaned);
             updateUI(); // Update UI
+            $scope.totalCleaned = 0;
         }
 
         // Function to Update Roomba's position in the UI
-        function updateUI() {
+        function updateUI(size) {
             var css = {
-                width: 100 / $scope.grid[0].value.length + '%', 
-                height: 100/$scope.grid.length + '%', 
                 transform: 'translateX(' + $scope.currentPos.x*100 + '%) translateY(-' + $scope.currentPos.y*100 + '%)'
             };
+            if (size) {
+                css.width = 100 / $scope.grid[0].value.length + '%';
+                css.height = 100/$scope.grid.length + '%';
+            }
             $('.roomba').css(css);
         }
 
 
-        // TEST SETUP
-        var emptyGrid = createGrid(5, 5),
-        patches = [
-            {'x': 1, 'y': 3},
-            {'x': 3, 'y': 1},
-            {'x': 4, 'y': 4}
-        ];
-        $scope.grid = createPatches(emptyGrid, patches);
-        updateUI();
+        function init () {
+            var obj = Instructions.get(); // Get the instructions
+            if (!('size' in obj)) $scope.reset();
+            else {
+                var emptyGrid = createGrid(obj.size[0], obj.size[1]), // Make the empty grid
+                patches = obj.patches;
+
+                $scope.grid = createPatches(emptyGrid, patches); // Fill the grid with dirty patches
+                $scope.currentPos = obj.pos; // Set the init position of Roomba
+                $scope.directions = obj.directions; // Set the list of directions
+
+                $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1; // clean it
+
+                updateUI(1);
+            }
+        }
+
+        init(); // Get the data
     });

@@ -1,5 +1,5 @@
 <textarea ng-model="input" ng-focus="error = ''" placeholder="Enter Roomba input"></textarea>
 <div class=meta>    
     <a class="button" ng-click="process()">Process</a>
-    <p class="error" ng-bind="error"></p>
+    <p class="error" ng-if="error.length" ng-bind="error"></p>
 </div>

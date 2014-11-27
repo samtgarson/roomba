@@ -43,5 +43,10 @@ angular.module('states', [])
                 'url'               : '/',
                 'templateUrl': templater('home'), 
                 'controller': 'homeController'
+            })
+            .state('grid', {
+                'url'               : '/grid',
+                'templateUrl': templater('grid'), 
+                'controller': 'gridController'
             });
     });
