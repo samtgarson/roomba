@@ -1,13 +1,13 @@
 angular.module('home', [])
     .controller('homeController', function($scope, $timeout, Instructions, $state) {
         $scope.input = '';
-        $scope.error = '';
+        $scope.error = false;
         var letters = ['N', 'S', 'E', 'W'];
 
         $scope.process = function() {
             try {    
                 var lines = $scope.input.split('\n');
-                
+
                 if (lines.length > 3) {
                     // Get roomba instructions
                     var directions = lines.splice(lines.length-1, 1)[0].split('');
@@ -39,6 +39,7 @@ angular.module('home', [])
                         return prev;
                     }, []);
 
+                    // Store the instructions in the global service
                     Instructions.set({
                         'directions': directions,
                         'size': size,

@@ -47,6 +47,11 @@ angular.module('states', [])
             .state('grid', {
                 'url'               : '/grid',
                 'templateUrl': templater('grid'), 
-                'controller': 'gridController'
+                'controller': 'gridController',
+                'resolve': {
+                    'instructions': function (Instructions) {
+                        return Instructions.get();
+                    }
+                }
             });
     });

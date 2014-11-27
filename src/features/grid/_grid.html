@@ -7,8 +7,8 @@
     </div>
     <div class="roomba"><span></span></div>
 </div>    
-<div class=meta>
+<div class=meta  ng-if="!done">
     <a class="button" ng-class="{'busy': busy}" ng-click="!busy && start(0)" ng-bind="busy?'Busy...':'Simulate'"></a>
     <a class="button" ng-class="{'busy': busy}" ng-click="!busy && start(1)" ng-bind="busy?'Busy...':'Get On With It'"></a>
 </div>
-<a class="button button--minor" ng-click="reset()" ng-class="{'busy': busy}" ng-click="!busy && another()" ng-bind="busy?'Busy...':'Another'"></a>
+<a class="button button--minor" ng-if="done" ng-click="reset()" ng-class="{'busy': busy}" ng-click="!busy && another()" ng-bind="busy?'Busy...':'Another'"></a>

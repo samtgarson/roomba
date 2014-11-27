@@ -1,5 +1,5 @@
 angular.module('grid', [])
-    .controller('gridController', function($scope, $timeout, Instructions, $state) {
+    .controller('gridController', function($scope, $timeout, instructions, $state, Instructions) {
           
         // Translation hash from compass direction to coordinate vectors
         var dir = {
@@ -19,6 +19,23 @@ angular.module('grid', [])
         var skip = false;
 
         $scope.currentPos = {'x': 0, 'y': 0};
+
+        // PUBLIC METHODS
+
+        // Function to start simulation
+        $scope.start = function (s) {
+            skip = s;
+            $scope.busy = true;
+            process(0);
+        };
+
+        // Reset the grid and return home
+        $scope.reset = function () {
+            Instructions.reset();
+            $state.go('home');
+        };
+
+        // PRIVATE FUNCTIONS
 
         // Function to create 2D Array
         function createGrid (x, y) {
@@ -40,19 +57,6 @@ angular.module('grid', [])
             return grid;
         }
 
-        // Function to start simulation
-        $scope.start = function (s) {
-            skip = s;
-            $scope.busy = true;
-            process(0);
-        };
-
-        // Reset the grid and return home
-        $scope.reset = function () {
-            Instructions.reset();
-            $state.go('home');
-        };
-
         // Process next step
         function process(step) {
             if (step != $scope.directions.length) { // If there are more steps
@@ -68,27 +72,28 @@ angular.module('grid', [])
                 if (newPos.x < $scope.grid[0].value.length && newPos.y < $scope.grid.length && newPos.x >= 0 && newPos.y >= 0) { 
                     $scope.currentPos = newPos;
 
-                    if ($scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] > 1) { // if the current cell is dirty (==1)
+                    if ($scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] > 1) { // if the current cell is dirty (==2)
                         $scope.totalCleaned ++; // increase counter
                     }
-                    $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1; // clean it
+                    $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1; // clean it, mark it as visited (==1)
 
                     if (!skip) updateUI(); // Update UI
                     $timeout(function() { // Wait for UI animation
                         process(step+1); // Then process next instruction
-                    }, skip?0:$scope.interval);
+                    }, skip?0:$scope.interval); // Only wait if we're not in a hurry
                 } else process(step+1); // The roomba skids against the wall, process the next step
             } else finish();
         }
 
         // Finsih and display
         function finish () {
-            $scope.busy = false;
-            console.log($scope.currentPos.x, $scope.currentPos.y);
-            alert('Final Position: (' + $scope.currentPos.x + ', ' + $scope.currentPos.y + ')\nTotal Patches Cleaned: ' +  $scope.totalCleaned);
+            $scope.busy = false; // Enable buttons
+            console.log($scope.currentPos.x, $scope.currentPos.y); // Log results
             console.log($scope.totalCleaned);
+            alert('Final Position: (' + $scope.currentPos.x + ', ' + $scope.currentPos.y + ')\nTotal Patches Cleaned: ' +  $scope.totalCleaned); // Alert results
             updateUI(); // Update UI
-            $scope.totalCleaned = 0;
+            $scope.done = true;
+            $scope.totalCleaned = 0; // Reset for next time
         }
 
         // Function to Update Roomba's position in the UI
@@ -105,15 +110,14 @@ angular.module('grid', [])
 
 
         function init () {
-            var obj = Instructions.get(); // Get the instructions
-            if (!('size' in obj)) $scope.reset();
+            if (!('size' in instructions)) $scope.reset();
             else {
-                var emptyGrid = createGrid(obj.size[0], obj.size[1]), // Make the empty grid
-                patches = obj.patches;
+                var emptyGrid = createGrid(instructions.size[0], instructions.size[1]), // Make the empty grid
+                patches = instructions.patches;
 
                 $scope.grid = createPatches(emptyGrid, patches); // Fill the grid with dirty patches
-                $scope.currentPos = obj.pos; // Set the init position of Roomba
-                $scope.directions = obj.directions; // Set the list of directions
+                $scope.currentPos = instructions.pos; // Set the init position of Roomba
+                $scope.directions = instructions.directions; // Set the list of directions
 
                 $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1; // clean it
 

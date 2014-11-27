@@ -1,6 +1,8 @@
 angular.module('services', [])
     .service('Instructions', function() {
+        // Service to store the current instructions
         var obj = {};
+        
         this.set = function(newObj) {
             obj = newObj;
         };

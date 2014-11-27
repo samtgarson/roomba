@@ -21080,18 +21080,16 @@ angular.module("states", []).run(function() {}).config(function($stateProvider, 
     }).state("grid", {
         url: "/grid",
         templateUrl: templater("grid"),
-        controller: "gridController"
+        controller: "gridController",
+        resolve: {
+            instructions: function(Instructions) {
+                return Instructions.get();
+            }
+        }
     });
 });
-angular.module("<%= name%>", []).directive("go<%= bigname%>", function() {
-    return {
-        restrict: "E",
-        scope: {},
-        controller: "<%= name%>Controller as <%= name%>Ctrl",
-        templateUrl: "patterns/<%= name%>/_<%= name%>.html"
-    };
-}).controller("<%= name%>Controller", function($scope, $element) {});
-angular.module("grid", []).controller("gridController", function($scope, $timeout, Instructions, $state) {
+angular.module("<%= name%>", []).controller("<%= name%>Controller", function($scope) {});
+angular.module("grid", []).controller("gridController", function($scope, $timeout, instructions, $state, Instructions) {
     var dir = {
         N: {
             x: 0,
@@ -21121,6 +21119,15 @@ angular.module("grid", []).controller("gridController", function($scope, $timeou
         x: 0,
         y: 0
     };
+    $scope.start = function(s) {
+        skip = s;
+        $scope.busy = true;
+        process(0);
+    };
+    $scope.reset = function() {
+        Instructions.reset();
+        $state.go("home");
+    };
     function createGrid(x, y) {
         for (var i = 0, row = []; i < x; i++) row.push(0);
         for (var j = 0, grid = []; j < y; j++) {
@@ -21137,15 +21144,6 @@ angular.module("grid", []).controller("gridController", function($scope, $timeou
         }
         return grid;
     }
-    $scope.start = function(s) {
-        skip = s;
-        $scope.busy = true;
-        process(0);
-    };
-    $scope.reset = function() {
-        Instructions.reset();
-        $state.go("home");
-    };
     function process(step) {
         if (step != $scope.directions.length) {
             var nextStep = dir[$scope.directions[step]];
@@ -21169,9 +21167,10 @@ angular.module("grid", []).controller("gridController", function($scope, $timeou
     function finish() {
         $scope.busy = false;
         console.log($scope.currentPos.x, $scope.currentPos.y);
-        alert("Final Position: (" + $scope.currentPos.x + ", " + $scope.currentPos.y + ")\nTotal Patches Cleaned: " + $scope.totalCleaned);
         console.log($scope.totalCleaned);
+        alert("Final Position: (" + $scope.currentPos.x + ", " + $scope.currentPos.y + ")\nTotal Patches Cleaned: " + $scope.totalCleaned);
         updateUI();
+        $scope.done = true;
         $scope.totalCleaned = 0;
     }
     function updateUI(size) {
@@ -21185,22 +21184,28 @@ angular.module("grid", []).controller("gridController", function($scope, $timeou
         $(".roomba").css(css);
     }
     function init() {
-        var obj = Instructions.get();
-        if (!("size" in obj)) $scope.reset(); else {
-            var emptyGrid = createGrid(obj.size[0], obj.size[1]), patches = obj.patches;
+        if (!("size" in instructions)) $scope.reset(); else {
+            var emptyGrid = createGrid(instructions.size[0], instructions.size[1]), patches = instructions.patches;
             $scope.grid = createPatches(emptyGrid, patches);
-            $scope.currentPos = obj.pos;
-            $scope.directions = obj.directions;
+            $scope.currentPos = instructions.pos;
+            $scope.directions = instructions.directions;
             $scope.grid[$scope.currentPos.y].value[$scope.currentPos.x] = 1;
             updateUI(1);
         }
     }
     init();
 });
-angular.module("<%= name%>", []).controller("<%= name%>Controller", function($scope) {});
+angular.module("<%= name%>", []).directive("go<%= bigname%>", function() {
+    return {
+        restrict: "E",
+        scope: {},
+        controller: "<%= name%>Controller as <%= name%>Ctrl",
+        templateUrl: "patterns/<%= name%>/_<%= name%>.html"
+    };
+}).controller("<%= name%>Controller", function($scope, $element) {});
 angular.module("home", []).controller("homeController", function($scope, $timeout, Instructions, $state) {
     $scope.input = "";
-    $scope.error = "";
+    $scope.error = false;
     var letters = [ "N", "S", "E", "W" ];
     $scope.process = function() {
         try {
@@ -21246,8 +21251,8 @@ angular.module("home", []).controller("homeController", function($scope, $timeou
 });
 angular.module("templates", []).run([ "$templateCache", function($templateCache) {
     $templateCache.put("features/_feature/_feature.html", "");
-    $templateCache.put("features/home/_home.html", '<h1>Roomba simulator</h1>\n\n<textarea ng-model="input" ng-focus="error = \'\'" placeholder="Enter Roomba input"></textarea>\n<div class=meta>    \n    <a class="button" ng-click="process()">Process</a>\n    <p class="error" ng-if="error.length" ng-bind="error"></p>\n</div>');
-    $templateCache.put("features/grid/_grid.html", '<div class="grid">\n    <div class="row" ng-repeat="row in grid | orderBy : \'-index\'">\n        <span class="cell" ng-repeat="cell in row.value track by $index">\n            <div class="patch" ng-if="cell>1"></div>\n            <div class="visited" ng-if="cell==1"></div>\n        </span>\n    </div>\n    <div class="roomba"><span></span></div>\n</div>    \n<div class=meta>\n    <a class="button" ng-class="{\'busy\': busy}" ng-click="!busy && start(0)" ng-bind="busy?\'Busy...\':\'Simulate\'"></a>\n    <a class="button" ng-class="{\'busy\': busy}" ng-click="!busy && start(1)" ng-bind="busy?\'Busy...\':\'Get On With It\'"></a>\n</div>\n<a class="button button--minor" ng-click="reset()" ng-class="{\'busy\': busy}" ng-click="!busy && another()" ng-bind="busy?\'Busy...\':\'Another\'"></a>');
+    $templateCache.put("features/home/_home.html", '<h1>Roomba simulator</h1>\n\n<textarea ng-model="input" ng-focus="error = false" placeholder="Enter Roomba input"></textarea>\n<div class=meta>    \n    <a class="button" ng-click="process()">Process</a>\n    <p class="error" ng-if="error" ng-bind="error"></p>\n</div>');
+    $templateCache.put("features/grid/_grid.html", '<div class="grid">\n    <div class="row" ng-repeat="row in grid | orderBy : \'-index\'">\n        <span class="cell" ng-repeat="cell in row.value track by $index">\n            <div class="patch" ng-if="cell>1"></div>\n            <div class="visited" ng-if="cell==1"></div>\n        </span>\n    </div>\n    <div class="roomba"><span></span></div>\n</div>    \n<div class=meta  ng-if="!done">\n    <a class="button" ng-class="{\'busy\': busy}" ng-click="!busy && start(0)" ng-bind="busy?\'Busy...\':\'Simulate\'"></a>\n    <a class="button" ng-class="{\'busy\': busy}" ng-click="!busy && start(1)" ng-bind="busy?\'Busy...\':\'Get On With It\'"></a>\n</div>\n<a class="button button--minor" ng-if="done" ng-click="reset()" ng-class="{\'busy\': busy}" ng-click="!busy && another()" ng-bind="busy?\'Busy...\':\'Another\'"></a>');
     $templateCache.put("patterns/_pattern/_pattern.html", "");
 } ]);
 angular.module("app", [ "ui.router", "templates", "breakpointApp", "ngAnimate", "ngSanitize", "states", "services", "home", "grid" ]).controller("appController", function($scope) {
