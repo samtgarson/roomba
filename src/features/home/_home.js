@@ -7,8 +7,7 @@ angular.module('home', [])
         $scope.process = function() {
             try {    
                 var lines = $scope.input.split('\n');
-
-
+                
                 if (lines.length > 3) {
                     // Get roomba instructions
                     var directions = lines.splice(lines.length-1, 1)[0].split('');
@@ -19,7 +18,7 @@ angular.module('home', [])
                     }
                     // Get grid size
                     var size = lines.splice(0,1)[0].split(' ');
-                    if (size.length!=2 || isNaN(size[0]) || isNaN(size[1]) || size[0]+size[1]<4) throw 'invalid grid size'; // If there aren't 2 lengths or they're not numbers
+                    if (size.length!=2 || isNaN(size[0]) || isNaN(size[1]) || size[0]+size[1]<2) throw 'invalid grid size'; // If there aren't 2 lengths or they're not numbers
                     size[0] = parseInt(size[0]);
                     size[1] = parseInt(size[1]);
 
@@ -29,9 +28,10 @@ angular.module('home', [])
                     pos = {'x': parseInt(pos[0]), 'y': parseInt(pos[1])};
 
                     // Get patch positions
-                    var patches = lines.reduce(function(prev, current) {
+                    var patches = lines.reduce(function(prev, current) { // Format remaining lines into array of patches
                         var c = current.split(' ');
                         if (c.length != 2 || isNaN(c[0]) || isNaN(c[1])) throw "invalid patch coords"; // If there aren't 2 lengths or they're not numbers
+                        if (c[0] >= size[0] || c[0] < 0 || c[1] >= size[1] || c[1] < 0) throw 'patch coords outside grid';
                         prev.push({
                             'x': parseInt(c[0]),
                             'y': parseInt(c[1])

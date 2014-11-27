@@ -924,6 +924,9 @@ body {
     transform: translateY(20px);
     transition: 0.2s ease-out all; }
 
+h1 {
+  text-transform: capitalize; }
+
 textarea {
   width: 100%;
   padding: 1em;

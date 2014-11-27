@@ -37,7 +37,7 @@ gulp.task('js', function() {
         .pipe($.ngAnnotate())
         // .pipe($.angularFilesort())
         .pipe($.uglify())
-        .pipe($.concat('script.js'))
+        .pipe($.concat('script.min.js'))
         .pipe(gulp.dest('build/'));
 });
 

@@ -4,6 +4,7 @@
 // @import "patterns/**";
 
 $radius: 3px;
+$easeBack: cubic-bezier(.600, -.280, .735, .045);
 
 body {
     margin-bottom: 100px;
@@ -28,6 +29,10 @@ body {
         opacity: 0;
         transform: translateY(20px);
     }
+}
+
+h1 {
+    text-transform: capitalize;
 }
 
 textarea {
@@ -203,7 +208,7 @@ $dot-size: 20%;
         transform: scale(1);
     };
 
-    @include reveal-from(transform .2s .5s cubic-bezier(0.600, -0.280, 0.735, 0.045)) {
+    @include reveal-from(transform .2s .5s $easeBack) {
         transform: scale(0);
     };
 }
@@ -221,7 +226,7 @@ $dot-size: 20%;
         transform: scale(1);
     };
 
-    @include reveal-from(transform .2s .2s cubic-bezier(0.600, -0.280, 0.735, 0.045)) {
+    @include reveal-from(transform .2s .2s $easeBack) {
         transform: scale(0);
     };
 }

@@ -21083,7 +21083,14 @@ angular.module("states", []).run(function() {}).config(function($stateProvider, 
         controller: "gridController"
     });
 });
-angular.module("<%= name%>", []).controller("<%= name%>Controller", function($scope) {});
+angular.module("<%= name%>", []).directive("go<%= bigname%>", function() {
+    return {
+        restrict: "E",
+        scope: {},
+        controller: "<%= name%>Controller as <%= name%>Ctrl",
+        templateUrl: "patterns/<%= name%>/_<%= name%>.html"
+    };
+}).controller("<%= name%>Controller", function($scope, $element) {});
 angular.module("grid", []).controller("gridController", function($scope, $timeout, Instructions, $state) {
     var dir = {
         N: {
@@ -21190,6 +21197,7 @@ angular.module("grid", []).controller("gridController", function($scope, $timeou
     }
     init();
 });
+angular.module("<%= name%>", []).controller("<%= name%>Controller", function($scope) {});
 angular.module("home", []).controller("homeController", function($scope, $timeout, Instructions, $state) {
     $scope.input = "";
     $scope.error = "";
@@ -21204,7 +21212,7 @@ angular.module("home", []).controller("homeController", function($scope, $timeou
                     if (letters.indexOf(directions[i]) < 0) throw "invalid directions";
                 }
                 var size = lines.splice(0, 1)[0].split(" ");
-                if (size.length != 2 || isNaN(size[0]) || isNaN(size[1]) || size[0] + size[1] < 4) throw "invalid grid size";
+                if (size.length != 2 || isNaN(size[0]) || isNaN(size[1]) || size[0] + size[1] < 2) throw "invalid grid size";
                 size[0] = parseInt(size[0]);
                 size[1] = parseInt(size[1]);
                 var pos = lines.splice(0, 1)[0].split(" ");
@@ -21216,6 +21224,7 @@ angular.module("home", []).controller("homeController", function($scope, $timeou
                 var patches = lines.reduce(function(prev, current) {
                     var c = current.split(" ");
                     if (c.length != 2 || isNaN(c[0]) || isNaN(c[1])) throw "invalid patch coords";
+                    if (c[0] >= size[0] || c[0] < 0 || c[1] >= size[1] || c[1] < 0) throw "patch coords outside grid";
                     prev.push({
                         x: parseInt(c[0]),
                         y: parseInt(c[1])
@@ -21235,17 +21244,9 @@ angular.module("home", []).controller("homeController", function($scope, $timeou
         }
     };
 });
-angular.module("<%= name%>", []).directive("go<%= bigname%>", function() {
-    return {
-        restrict: "E",
-        scope: {},
-        controller: "<%= name%>Controller as <%= name%>Ctrl",
-        templateUrl: "patterns/<%= name%>/_<%= name%>.html"
-    };
-}).controller("<%= name%>Controller", function($scope, $element) {});
 angular.module("templates", []).run([ "$templateCache", function($templateCache) {
     $templateCache.put("features/_feature/_feature.html", "");
-    $templateCache.put("features/home/_home.html", '<textarea ng-model="input" ng-focus="error = \'\'" placeholder="Enter Roomba input"></textarea>\n<div class=meta>    \n    <a class="button" ng-click="process()">Process</a>\n    <p class="error" ng-if="error.length" ng-bind="error"></p>\n</div>');
+    $templateCache.put("features/home/_home.html", '<h1>Roomba simulator</h1>\n\n<textarea ng-model="input" ng-focus="error = \'\'" placeholder="Enter Roomba input"></textarea>\n<div class=meta>    \n    <a class="button" ng-click="process()">Process</a>\n    <p class="error" ng-if="error.length" ng-bind="error"></p>\n</div>');
     $templateCache.put("features/grid/_grid.html", '<div class="grid">\n    <div class="row" ng-repeat="row in grid | orderBy : \'-index\'">\n        <span class="cell" ng-repeat="cell in row.value track by $index">\n            <div class="patch" ng-if="cell>1"></div>\n            <div class="visited" ng-if="cell==1"></div>\n        </span>\n    </div>\n    <div class="roomba"><span></span></div>\n</div>    \n<div class=meta>\n    <a class="button" ng-class="{\'busy\': busy}" ng-click="!busy && start(0)" ng-bind="busy?\'Busy...\':\'Simulate\'"></a>\n    <a class="button" ng-class="{\'busy\': busy}" ng-click="!busy && start(1)" ng-bind="busy?\'Busy...\':\'Get On With It\'"></a>\n</div>\n<a class="button button--minor" ng-click="reset()" ng-class="{\'busy\': busy}" ng-click="!busy && another()" ng-bind="busy?\'Busy...\':\'Another\'"></a>');
     $templateCache.put("patterns/_pattern/_pattern.html", "");
 } ]);
