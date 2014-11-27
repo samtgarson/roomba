@@ -1,4 +1,9 @@
-Boilerplate v2.0
+Roomba Simulator
 ==========
 
-Angular Starter Pack
+Input:
+
+[Grid Size]
+[Initial Roomba position]
+[At Least one dirty patch coord]
+[String of directions]
